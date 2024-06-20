@@ -5,13 +5,17 @@ import pygame
 import os
 import sys
 import signal
+import psutil
 
 # Initialize pygame mixer
 pygame.mixer.init()
 
-# Path to sound files (hardcoded)
-SOUND_FILE_ONE = "/Users/john/metronome-click-1.mp3"
-SOUND_FILE_OTHER = "/Users/john/metronome-click.mp3"
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Path to sound files
+SOUND_FILE_ONE = os.path.join(script_dir, "metronome-click-1.mp3")
+SOUND_FILE_OTHER = os.path.join(script_dir, "metronome-click.mp3")
 
 # Load sound files
 sound_one = pygame.mixer.Sound(SOUND_FILE_ONE)
@@ -36,6 +40,20 @@ def play_metronome(bpm):
         elapsed_time = time.time() - start_time
         time.sleep(max(0, interval - elapsed_time))
 
+def kill_metronome_procs():
+    current_pid = os.getpid()
+    script_name = os.path.basename(__file__)
+    for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+        if os.path.exists("/tmp/metronome.pid"):
+            os.remove("/tmp/metronome.pid")
+        try:
+            cmdline = proc.info['cmdline']
+            if cmdline and len(cmdline) > 1 and script_name in cmdline[1]:
+                if proc.info['pid'] != current_pid:
+                    os.kill(proc.info['pid'], signal.SIGKILL)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+            pass
+
 if __name__ == "__main__":
     import sys
     if len(sys.argv) > 1 and sys.argv[1].isdigit():
@@ -52,7 +70,8 @@ if __name__ == "__main__":
         if os.path.exists("/tmp/metronome.pid"):
             with open("/tmp/metronome.pid", "r") as f:
                 pid = int(f.read())
-                print(f"Process ID = {pid} ")
             os.kill(pid, signal.SIGKILL)
             os.remove("/tmp/metronome.pid")
+    elif len(sys.argv) > 1 and sys.argv[1] == "fix":
+       kill_metronome_procs()
   
