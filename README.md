@@ -40,8 +40,8 @@ This is a simple python script to start and stop a metronome at whatever BPM spe
 
 ## Notes
 * Only supports 4/4 time at the moment (you can set the 1 click file to be the same as the other click file if you don't want a 1 click)
-* You'll need to update the script's hashbang to point to your python environment.  
-* MP3 files to play for the 
+* You'll need to update the script's hashbang to point to your python environment. 
+* MP3 files to play for the clicks need to be in the same folder as the script
 * You need to install pip and pygame module
 * If you ever have an issue or crash and metronome is still playing, you can run:  `ps aux | grep metronome.py`   to get the process ID
 * Then:  `kill -9 <proc_id>`    to stop the process
